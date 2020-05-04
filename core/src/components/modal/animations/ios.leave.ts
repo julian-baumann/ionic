@@ -57,7 +57,7 @@ export const iosLeaveAnimation = (
       const safeArea = getComputedStyle(document.documentElement).getPropertyValue('--ion-safe-area-bottom');
 
       // Check if it's an iPhone with an edge-to-edge display
-      if (isIPhone && safeArea && safeArea != '0px') {
+      if (isIPhone === true && safeArea !== '0px') {
         finalBorderRadius = '39px 39px 0 0';
       }
 

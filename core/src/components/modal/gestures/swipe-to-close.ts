@@ -17,20 +17,19 @@ export const createSwipeToCloseGesture = (
   let isOpen = false;
   let preventStart = false;
 
-  const ionContent = el.getElementsByTagName("ion-content")[0];
+  const ionContent: any = el.getElementsByTagName('ion-content')[0];
   let scrollElement: any;
 
-  if (ionContent) {
+  if (ionContent !== null) {
     ionContent.forceOverscroll = false;
     ionContent.getScrollElement().then(scrollElem => {
       scrollElement = scrollElem;
-      scrollElem.addEventListener("scroll", (scrollEvent: any) => {
+      scrollElem.addEventListener('scroll', (scrollEvent: any) => {
         preventStart = true;
-        if (scrollEvent.target.scrollTop <= 0)
-        {
+        if (scrollEvent.target.scrollTop <= 0) {
           preventStart = false;
         }
-      })
+      });
     });
   }
 
@@ -45,8 +44,7 @@ export const createSwipeToCloseGesture = (
     const content = target.closest('ion-content');
     if (content === null) {
       return true;
-    }
-    else {
+    } else {
       return !preventStart;
     }
     // Check if target is in the content and if it's scrolled to the very top.
@@ -57,8 +55,8 @@ export const createSwipeToCloseGesture = (
   let overflowValue: any;
 
   const onStart = () => {
-    if (scrollElement && overflowValue != "auto") {
-      overflowValue = "auto";
+    if (scrollElement !== null && overflowValue !== 'auto') {
+      overflowValue = 'auto';
       scrollElement.style.overflow = overflowValue;
     }
 
@@ -66,19 +64,19 @@ export const createSwipeToCloseGesture = (
   };
 
   const onMove = (detail: GestureDetail) => {
-    if (scrollElement && overflowValue != "hidden" && detail.deltaY >=0) {
-      overflowValue = "hidden";
+    if (scrollElement !== null && overflowValue !== 'hidden' && detail.deltaY >= 0) {
+      overflowValue = 'hidden';
       scrollElement.style.overflow = overflowValue;
     }
 
-    let step = getStep(detail.deltaY, height);
+    const step = getStep(detail.deltaY, height);
 
     animation.progressStep(step);
   };
 
   const onEnd = (detail: GestureDetail) => {
-    if (scrollElement && overflowValue != "auto") {
-      overflowValue = "auto";
+    if (scrollElement !== null && overflowValue !== 'auto') {
+      overflowValue = 'auto';
       scrollElement.style.overflow = overflowValue;
     }
 
@@ -87,7 +85,7 @@ export const createSwipeToCloseGesture = (
       velocity = 0.0001; // Fixes modal stuck when swiping up from the bottom very fast
     }
 
-    let step = getStep(detail.deltaY, height);
+    const step = getStep(detail.deltaY, height);
 
     const threshold = (detail.deltaY + velocity * 1000) / height;
 
@@ -142,10 +140,9 @@ const getStep = (deltaY: number, height: number) => {
   let step = deltaY / height;
   if (step <= 0) {
     step = 0.0001; // Fixes modal stuck when swiping up too fast
-  }
-  else if (step >= 1) {
+  } else if (step >= 1) {
     step = 0.9999; // Fixes modal stuck when swiping down too fast
   }
 
   return step;
-}
+};
