@@ -39,16 +39,14 @@ export const createSwipeToCloseGesture = (
   };
 
   const onMove = (detail: GestureDetail) => {
-    const step = detail.deltaY / height;
-    if (step < 0) { return; }
+    let step = getStep(detail.deltaY, height);
 
     animation.progressStep(step);
   };
 
   const onEnd = (detail: GestureDetail) => {
     const velocity = detail.velocityY;
-    const step = detail.deltaY / height;
-    if (step < 0) { return; }
+    let step = getStep(detail.deltaY, height);
 
     const threshold = (detail.deltaY + velocity * 1000) / height;
 
@@ -98,3 +96,15 @@ export const createSwipeToCloseGesture = (
 const computeDuration = (remaining: number, velocity: number) => {
   return clamp(400, remaining / Math.abs(velocity * 1.1), 500);
 };
+
+const getStep = (deltaY: number, height: number) => {
+  let step = deltaY / height;
+  if (step < 0) {
+    step = 0.0001; // Fixes modal stuck when swiping up too fast
+  }
+  else if (step > 1) {
+    step = 0.9999; // Fixes modal stuck when swiping down too fast
+  }
+
+  return step;
+}
