@@ -22,7 +22,7 @@ export const createSwipeToCloseGesture = (
 
   if (ionContent !== null) {
     ionContent.forceOverscroll = false;
-    ionContent.getScrollElement().then(scrollElem => {
+    ionContent.getScrollElement().then((scrollElem: any) => {
       scrollElement = scrollElem;
       scrollElem.addEventListener('scroll', (scrollEvent: any) => {
         preventStart = true;
@@ -55,11 +55,6 @@ export const createSwipeToCloseGesture = (
   let overflowValue: any;
 
   const onStart = () => {
-    if (scrollElement !== null && overflowValue !== 'auto') {
-      overflowValue = 'auto';
-      scrollElement.style.overflow = overflowValue;
-    }
-
     animation.progressStart(true, (isOpen) ? 1 : 0);
   };
 
