@@ -15,6 +15,24 @@ export const createSwipeToCloseGesture = (
 ) => {
   const height = el.offsetHeight;
   let isOpen = false;
+  let preventStart = false;
+
+  const ionContent = el.getElementsByTagName("ion-content")[0];
+  let scrollElement: any;
+
+  if (ionContent) {
+    ionContent.forceOverscroll = false;
+    ionContent.getScrollElement().then(scrollElem => {
+      scrollElement = scrollElem;
+      scrollElem.addEventListener("scroll", (scrollEvent: any) => {
+        preventStart = true;
+        if (scrollEvent.target.scrollTop <= 0)
+        {
+          preventStart = false;
+        }
+      })
+    });
+  }
 
   const canStart = (detail: GestureDetail) => {
     const target = detail.event.target as HTMLElement | null;
@@ -28,24 +46,47 @@ export const createSwipeToCloseGesture = (
     if (content === null) {
       return true;
     }
-    // Target is in the content so we don't start the gesture.
-    // We could be more nuanced here and allow it for content that
-    // does not need to scroll.
-    return false;
+    else {
+      return !preventStart;
+    }
+    // Check if target is in the content and if it's scrolled to the very top.
+    // If target is not in the content, start the gesture, since this could be the header or some other static components,
+    // from which you should always be able to swipe down the modal, no matter how much is scrolled.
   };
 
+  let overflowValue: any;
+
   const onStart = () => {
+    if (scrollElement && overflowValue != "auto") {
+      overflowValue = "auto";
+      scrollElement.style.overflow = overflowValue;
+    }
+
     animation.progressStart(true, (isOpen) ? 1 : 0);
   };
 
   const onMove = (detail: GestureDetail) => {
+    if (scrollElement && overflowValue != "hidden" && detail.deltaY >=0) {
+      overflowValue = "hidden";
+      scrollElement.style.overflow = overflowValue;
+    }
+
     let step = getStep(detail.deltaY, height);
 
     animation.progressStep(step);
   };
 
   const onEnd = (detail: GestureDetail) => {
-    const velocity = detail.velocityY;
+    if (scrollElement && overflowValue != "auto") {
+      overflowValue = "auto";
+      scrollElement.style.overflow = overflowValue;
+    }
+
+    let velocity = detail.velocityY;
+    if (velocity < 0) {
+      velocity = 0.0001; // Fixes modal stuck when swiping up from the bottom very fast
+    }
+
     let step = getStep(detail.deltaY, height);
 
     const threshold = (detail.deltaY + velocity * 1000) / height;
@@ -99,10 +140,10 @@ const computeDuration = (remaining: number, velocity: number) => {
 
 const getStep = (deltaY: number, height: number) => {
   let step = deltaY / height;
-  if (step < 0) {
+  if (step <= 0) {
     step = 0.0001; // Fixes modal stuck when swiping up too fast
   }
-  else if (step > 1) {
+  else if (step >= 1) {
     step = 0.9999; // Fixes modal stuck when swiping down too fast
   }
 
