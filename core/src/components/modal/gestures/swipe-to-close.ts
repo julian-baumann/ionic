@@ -76,7 +76,7 @@ export const createSwipeToCloseGesture = (
     }
 
     let velocity = detail.velocityY;
-    if (velocity < 0) {
+    if (velocity <= 0) {
       velocity = 0.0001; // Fixes modal stuck when swiping up from the bottom very fast
     }
 
@@ -132,12 +132,6 @@ const computeDuration = (remaining: number, velocity: number) => {
 };
 
 const getStep = (deltaY: number, height: number) => {
-  let step = deltaY / height;
-  if (step <= 0) {
-    step = 0.0001; // Fixes modal stuck when swiping up too fast
-  } else if (step >= 1) {
-    step = 0.9999; // Fixes modal stuck when swiping down too fast
-  }
-
-  return step;
+  const step = (height > 0) ? deltaY / height : 0.0001;
+  return Math.max(0.0001, Math.min(0.9999, step)); // Prevent step to be > 1 or < 0, cause this would throw an error
 };
